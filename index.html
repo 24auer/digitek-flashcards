@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digitaalitekniikan flashcardit</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --text: #1c1c1a;
+    --muted: #6b6a64;
+    --border: #d9d8d2;
+    --accent: #185FA5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1c1a;
+      --surface: #2a2a27;
+      --text: #f0efe8;
+      --muted: #9c9a92;
+      --border: #44443f;
+      --accent: #85B7EB;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1c1a;
+    --surface: #2a2a27;
+    --text: #f0efe8;
+    --muted: #9c9a92;
+    --border: #44443f;
+    --accent: #85B7EB;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+  h1 { font-size: 22px; font-weight: 500; margin: 0 0 16px; }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  select, button {
+    font: inherit;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .count { margin-left: auto; font-size: 14px; color: var(--muted); }
+  #card {
+    min-height: 200px;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+  }
+  #tag { font-size: 12px; color: var(--muted); }
+  #text { font-size: 17px; }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  .actions .group { display: flex; gap: 8px; }
+  .hint { margin-top: 12px; font-size: 14px; color: var(--muted); }
+  button.primary { border-color: var(--accent); color: var(--accent); }
+  button.reset { color: var(--muted); }
+  kbd {
+    font-family: inherit;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Digitaalitekniikan flashcardit</h1>
+  <div class="controls">
+    <select id="lec">
+      <option value="all">Kaikki luennot</option>
+      <option value="1">Luento 1</option>
+      <option value="2">Luento 2</option>
+      <option value="3">Luento 3</option>
+      <option value="4">Luento 4</option>
+      <option value="5">Luento 5</option>
+      <option value="6">Luento 6</option>
+      <option value="7">Luento 7</option>
+    </select>
+    <button id="shuffle">Sekoita</button>
+    <button id="reset" class="reset">Nollaa edistyminen</button>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div id="card" tabindex="0" aria-label="Flashcard">
+    <span id="tag"></span>
+    <div id="text"></div>
+  </div>
+
+  <div class="actions">
+    <button id="prev">Edellinen</button>
+    <div class="group">
+      <button id="nope">Opettele vielä</button>
+      <button id="yes" class="primary">Osasin</button>
+    </div>
+    <button id="next">Seuraava</button>
+  </div>
+  <p class="hint" id="hint"></p>
+  <p class="hint">Näppäimet: <kbd>välilyönti</kbd> kääntää, <kbd>→</kbd> seuraava, <kbd>←</kbd> edellinen, <kbd>1</kbd> opettele vielä, <kbd>2</kbd> osasin.</p>
+</main>
+<script>
+const CARDS = [
+  { id: 1, lecture: 1, question: "Mikä on analogisen ja digitaalisen signaalin ero?", answer: "Analoginen signaali muuttuu jatkuvasti ja voi saada mitä tahansa arvoa. Digitaalinen signaali käyttää rajallista määrää tiloja, yleensä 0 ja 1, ja on kestävämpi häiriöille." },
+  { id: 2, lecture: 1, question: "Mitä Ohmin laki kertoo?", answer: "U = R · I, eli jännite on vastuksen ja virran tulo." },
+  { id: 3, lecture: 1, question: "Mitä Kirchhoffin jänniteyhtälö sanoo?", answer: "Piirin silmukan jännitteiden summa on nolla: ΣU = 0." },
+  { id: 4, lecture: 1, question: "Mitä SN74HC00 sisältää ja mikä on sen toimintajännite?", answer: "Neljä 2-tulotulon NAND-porttia. Toimintajännite on 2–6 V." },
+  { id: 5, lecture: 2, question: "Mikä on kombinaatiopiirin ominaisuus?", answer: "Lähtö riippuu vain tämänhetkisistä tuloista, ei aiemmista tiloista." },
+  { id: 6, lecture: 2, question: "Miksi NAND ja NOR ovat universaaleja portteja?", answer: "Mikä tahansa logiikkapiiri voidaan rakentaa pelkästä NAND- tai pelkästä NOR-porteista." },
+  { id: 7, lecture: 2, question: "Kuinka monta riviä on kolmen tulon totuustaulussa?", answer: "2³ = 8 riviä." },
+  { id: 8, lecture: 2, question: "Milloin AND-portin lähtö on 1?", answer: "Vain kun kaikki tulot ovat 1." },
+  { id: 9, lecture: 3, question: "Kuka kehitti Boolen algebran ja minä vuonna?", answer: "George Boole, 1815." },
+  { id: 10, lecture: 3, question: "Mikä on De Morganin laki NAND-portille?", answer: "(A·B)‾ = Ā + B̄." },
+  { id: 11, lecture: 3, question: "Mikä on De Morganin laki NOR-portille?", answer: "(A+B)‾ = Ā · B̄." },
+  { id: 12, lecture: 3, question: "Mitä A · Ā on?", answer: "0." },
+  { id: 13, lecture: 4, question: "Muunna 1101₂ desimaaliksi.", answer: "1·8 + 1·4 + 0·2 + 1·1 = 13." },
+  { id: 14, lecture: 4, question: "Muunna 13₁₀ binääriksi.", answer: "1101₂. Jaa kahdella ja kirjoita jakojäännökset alhaalta ylös." },
+  { id: 15, lecture: 4, question: "Mikä on 1101 1010₂ heksadesimaalina?", answer: "DA₁₆." },
+  { id: 16, lecture: 4, question: "Kuinka monta tasoa 10-bittisellä AD-muuntimella on?", answer: "2¹⁰ = 1024 tasoa." },
+  { id: 17, lecture: 4, question: "Mikä on 10-bittisen AD-muuntimen askel, kun vertailujännite on 5 V?", answer: "5 V / 1024 ≈ 4,9 mV." },
+  { id: 18, lecture: 4, question: "Mikä on näytteenotto- ja pidätyspiirin (S/H) tehtävä?", answer: "Pitää jännitteen vakaana muunnoksen ajan." },
+  { id: 19, lecture: 5, question: "Mikä on puolisummaimen S ja C?", answer: "S = A ⊕ B ja C = A · B." },
+  { id: 20, lecture: 5, question: "Miten täyssummain eroaa puolisummaimesta?", answer: "Täyssummain ottaa huomioon myös edellisen bitin siirron Cin:n." },
+  { id: 21, lecture: 5, question: "Mikä on täyssummaimen Cout?", answer: "Cout = A·B + Cin·(A ⊕ B)." },
+  { id: 22, lecture: 5, question: "Mikä on konekieli?", answer: "Prosessorin ymmärtämät binäärikäskyt." },
+  { id: 23, lecture: 5, question: "Mikä muuntaa assemblerin konekieleksi?", answer: "Assembleri." },
+  { id: 24, lecture: 5, question: "Mitä eroa on kääntäjällä ja tulkilla?", answer: "Kääntäjä muuntaa koko ohjelman ennen suoritusta, tulkki suorittaa ohjelman rivi kerrallaan." },
+  { id: 25, lecture: 6, question: "Mikä tekee piirin sekvenssipiiriksi?", answer: "Lähtö riippuu tulojen lisäksi tilasta, eli piiri muistaa aiemman tilansa." },
+  { id: 26, lecture: 6, question: "Mikä on synkronisen piirin ominaisuus?", answer: "Kaikki tilat muuttuvat yhteisen kellosignaalin tahdissa." },
+  { id: 27, lecture: 6, question: "Mikä on SR-salvan kielletty tila?", answer: "S = 1 ja R = 1." },
+  { id: 28, lecture: 6, question: "Mikä on D-salvan toiminta, kun C1 on päällä?", answer: "Q seuraa D:tä." },
+  { id: 29, lecture: 6, question: "Mikä ero on salvalla ja kiikulla?", answer: "Salpa reagoi tason perusteella, kiikku reunan perusteella." },
+  { id: 30, lecture: 6, question: "Mitä D-kiikku tekee?", answer: "Tallentaa D-tulon kellon reunalla: Q(t+1) = D." },
+  { id: 31, lecture: 6, question: "Mikä on T-kiikun toiminta?", answer: "T = 0 pitää tilan, T = 1 vaihtaa tilan kellon reunalla." },
+  { id: 32, lecture: 6, question: "Mikä on JK-kiikun toiminta, kun J = K = 1?", answer: "Tila vaihtuu (toggle)." },
+  { id: 33, lecture: 7, question: "Mitä siirtorekisteri tekee?", answer: "Siirtää dataa yhden kiikun kerrallaan kellon tahdissa." },
+  { id: 34, lecture: 7, question: "Mitä rinnakkaisrekisteri tekee?", answer: "Tallentaa koko n-bittisen sanan yhdellä kellolla." },
+  { id: 35, lecture: 7, question: "Mitä eroa on asynkronisella ja synkronisella laskurilla?", answer: "Asynkronisessa laskurissa kellot ketjutetaan edellisen kiikun lähdöstä, synkronisessa kaikki kiikut ovat samalla kellolla." },
+  { id: 36, lecture: 7, question: "Mihin laskureita käytetään?", answer: "Ajastukseen, taajuuden jakoon ja muistiosoitteiden muodostamiseen." }
+];
+</script>
+<script>
+  const STORAGE_KEY = 'digitaalitekniikka-flashcards-v1';
+
+  let list = [...CARDS];
+  let index = 0;
+  let showBack = false;
+  let known = loadKnown();
+
+  const el = {
+    lec: document.getElementById('lec'),
+    shuffle: document.getElementById('shuffle'),
+    reset: document.getElementById('reset'),
+    count: document.getElementById('count'),
+    card: document.getElementById('card'),
+    tag: document.getElementById('tag'),
+    text: document.getElementById('text'),
+    prev: document.getElementById('prev'),
+    next: document.getElementById('next'),
+    yes: document.getElementById('yes'),
+    nope: document.getElementById('nope'),
+    hint: document.getElementById('hint')
+  };
+
+  function loadKnown() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return new Set();
+      const ids = JSON.parse(raw);
+      return new Set(Array.isArray(ids) ? ids : []);
+    } catch (e) {
+      return new Set();
+    }
+  }
+
+  function saveKnown() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...known]));
+    } catch (e) {
+      // Tallennus ei onnistu esim. yksityisessä selaustilassa. Sovellus toimii silti.
+    }
+  }
+
+  function render() {
+    if (list.length === 0) {
+      el.tag.textContent = '';
+      el.text.textContent = 'Ei kortteja valitulle luennolle.';
+      el.count.textContent = '';
+      el.hint.textContent = '';
+      return;
+    }
+    const c = list[index];
+    el.tag.textContent = 'Luento ' + c.lecture + ' · ' + (index + 1) + ' / ' + list.length;
+    el.text.textContent = showBack ? c.answer : c.question;
+    const doneInList = list.filter(card => known.has(card.id)).length;
+    el.count.textContent = 'Osasin: ' + doneInList + ' / ' + list.length;
+    el.hint.textContent = showBack
+      ? 'Klikkaa korttia palataksesi kysymykseen'
+      : 'Klikkaa korttia nähdäksesi vastauksen';
+  }
+
+  function flip() { showBack = !showBack; render(); }
+  function next() { if (list.length) { index = (index + 1) % list.length; showBack = false; render(); } }
+  function prev() { if (list.length) { index = (index - 1 + list.length) % list.length; showBack = false; render(); } }
+
+  function mark(ok) {
+    if (!list.length) return;
+    const c = list[index];
+    if (ok) known.add(c.id); else known.delete(c.id);
+    saveKnown();
+    next();
+  }
+
+  function resetProgress() {
+    if (!confirm('Nollataanko kaikki osaamisen edistyminen?')) return;
+    known = new Set();
+    saveKnown();
+    render();
+  }
+
+  function setLecture() {
+    const v = el.lec.value;
+    list = v === 'all' ? [...CARDS] : CARDS.filter(c => String(c.lecture) === v);
+    index = 0;
+    showBack = false;
+    render();
+  }
+
+  function shuffle() {
+    list = [...list].sort(() => Math.random() - 0.5);
+    index = 0;
+    showBack = false;
+    render();
+  }
+
+  el.lec.addEventListener('change', setLecture);
+  el.shuffle.addEventListener('click', shuffle);
+  el.reset.addEventListener('click', resetProgress);
+  el.card.addEventListener('click', flip);
+  el.prev.addEventListener('click', prev);
+  el.next.addEventListener('click', next);
+  el.yes.addEventListener('click', () => mark(true));
+  el.nope.addEventListener('click', () => mark(false));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'SELECT') return;
+    if (e.key === ' ') { e.preventDefault(); flip(); }
+    else if (e.key === 'ArrowRight') next();
+    else if (e.key === 'ArrowLeft') prev();
+    else if (e.key === '1') mark(false);
+    else if (e.key === '2') mark(true);
+  });
+
+  render();
+</script>
+</body>
+</html>

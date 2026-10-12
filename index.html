@@ -76,7 +76,7 @@
     gap: 12px;
   }
   #tag { font-size: 12px; color: var(--muted); }
-  #text { font-size: 17px; }
+  #text { font-size: 17px; white-space: pre-line; }
   .actions {
     display: flex;
     flex-wrap: wrap;
@@ -146,11 +146,11 @@ const CARDS = [
   { id: 10, lecture: 3, question: "Mikä on De Morganin laki NAND-portille?", answer: "(A·B)‾ = Ā + B̄." },
   { id: 11, lecture: 3, question: "Mikä on De Morganin laki NOR-portille?", answer: "(A+B)‾ = Ā · B̄." },
   { id: 12, lecture: 3, question: "Mitä A · Ā on?", answer: "0." },
-  { id: 13, lecture: 4, question: "Muunna 1101₂ desimaaliksi.", answer: "1·8 + 1·4 + 0·2 + 1·1 = 13." },
+  { id: 13, lecture: 4, question: "Muunna 1101₂ desimaaliksi.", answer: "Paikat: 8, 4, 2, 1\nNumerot: 1, 1, 0, 1\n1·8 = 8\n1·4 = 4\n0·2 = 0\n1·1 = 1\nYhteensä: 8 + 4 + 0 + 1 = 13" },
   { id: 14, lecture: 4, question: "Muunna 13₁₀ binääriksi.", answer: "1101₂. Jaa kahdella ja kirjoita jakojäännökset alhaalta ylös." },
-  { id: 15, lecture: 4, question: "Mikä on 1101 1010₂ heksadesimaalina?", answer: "DA₁₆." },
+  { id: 15, lecture: 4, question: "Muunna 1101 1010₂ heksadesimaaliksi.", answer: "Ryhmittele 4 bitin ryhmiin: 1101 | 1010\n1101₂ = 13 = D\n1010₂ = 10 = A\nTulos: DA₁₆" },
   { id: 16, lecture: 4, question: "Kuinka monta tasoa 10-bittisellä AD-muuntimella on?", answer: "2¹⁰ = 1024 tasoa." },
-  { id: 17, lecture: 4, question: "Mikä on 10-bittisen AD-muuntimen askel, kun vertailujännite on 5 V?", answer: "5 V / 1024 ≈ 4,9 mV." },
+  { id: 17, lecture: 4, question: "Mikä on 10-bittisen AD-muuntimen askel, kun vertailujännite on 5 V?", answer: "Askel = 5 V / 1024\n5 / 1024 = 0,00488 V\nEli noin 4,9 mV" },
   { id: 18, lecture: 4, question: "Mikä on näytteenotto- ja pidätyspiirin (S/H) tehtävä?", answer: "Pitää jännitteen vakaana muunnoksen ajan." },
   { id: 19, lecture: 5, question: "Mikä on puolisummaimen S ja C?", answer: "S = A ⊕ B ja C = A · B." },
   { id: 20, lecture: 5, question: "Miten täyssummain eroaa puolisummaimesta?", answer: "Täyssummain ottaa huomioon myös edellisen bitin siirron Cin:n." },
@@ -169,7 +169,31 @@ const CARDS = [
   { id: 33, lecture: 7, question: "Mitä siirtorekisteri tekee?", answer: "Siirtää dataa yhden kiikun kerrallaan kellon tahdissa." },
   { id: 34, lecture: 7, question: "Mitä rinnakkaisrekisteri tekee?", answer: "Tallentaa koko n-bittisen sanan yhdellä kellolla." },
   { id: 35, lecture: 7, question: "Mitä eroa on asynkronisella ja synkronisella laskurilla?", answer: "Asynkronisessa laskurissa kellot ketjutetaan edellisen kiikun lähdöstä, synkronisessa kaikki kiikut ovat samalla kellolla." },
-  { id: 36, lecture: 7, question: "Mihin laskureita käytetään?", answer: "Ajastukseen, taajuuden jakoon ja muistiosoitteiden muodostamiseen." }
+  { id: 36, lecture: 7, question: "Mihin laskureita käytetään?", answer: "Ajastukseen, taajuuden jakoon ja muistiosoitteiden muodostamiseen." },
+
+  { id: 37, lecture: 2, question: "Mikä on AND-portin totuustaulu?", answer: "0 0→0; 0 1→0; 1 0→0; 1 1→1" },
+  { id: 38, lecture: 2, question: "Mikä on OR-portin totuustaulu?", answer: "0 0→0; 0 1→1; 1 0→1; 1 1→1" },
+  { id: 39, lecture: 2, question: "Mikä on NAND-portin totuustaulu?", answer: "0 0→1; 0 1→1; 1 0→1; 1 1→0" },
+  { id: 40, lecture: 2, question: "Mikä on NOR-portin totuustaulu?", answer: "0 0→1; 0 1→0; 1 0→0; 1 1→0" },
+  { id: 41, lecture: 2, question: "Mikä on XOR-portin totuustaulu?", answer: "0 0→0; 0 1→1; 1 0→1; 1 1→0" },
+  { id: 42, lecture: 2, question: "Mikä on XNOR-portin totuustaulu?", answer: "0 0→1; 0 1→0; 1 0→0; 1 1→1" },
+  { id: 43, lecture: 2, question: "Mikä on NOT-portin totuustaulu?", answer: "0→1; 1→0" },
+  { id: 44, lecture: 2, question: "Mitkä ovat eurooppalaiset symbolit AND, OR, XOR ja NOT?", answer: "AND: &, OR: ≥1, XOR: =1, NOT: 1. Negaatio merkitään lähdössä pienellä ympyrällä." },
+  { id: 45, lecture: 5, question: "Mistä porteista puolisummain koostuu?", answer: "XOR (=1) antaa S:n ja AND (&) antaa C:n. Molemmat portit saavat tulot A ja B." },
+  { id: 46, lecture: 5, question: "Mistä osista täyssummain koostuu?", answer: "Kahdesta puolisummaimesta (HA) ja OR-portista (≥1). OR antaa Cout:n." },
+  { id: 47, lecture: 6, question: "Mitkä ovat SR-salvan tulot ja lähdöt?", answer: "Tulot S ja R, lähdöt Q ja Q̄." },
+  { id: 48, lecture: 6, question: "Miten D-salvan symboli merkitään?", answer: "Tulot 1D ja C1. C1 on tasoohjaus, ei kellon kolmio." },
+  { id: 49, lecture: 6, question: "Miten D-kiikun symboli merkitään?", answer: "Tulot 1D ja kellotulo, jossa on kolmio ( > ). Kolmio tarkoittaa reunaherkkyyttä." },
+  { id: 50, lecture: 6, question: "Mitkä ovat T-kiikun tulot?", answer: "1T ja kellotulo > C1." },
+  { id: 51, lecture: 6, question: "Mitkä ovat JK-kiikun tulot?", answer: "1J, 1K ja kellotulo > C1." },
+  { id: 52, lecture: 7, question: "Miten siirtorekisteri kytketään?", answer: "D-kiikut ketjutetaan niin, että kunkin Q menee seuraavan kiikun D-tuloon. Kaikilla on yhteinen C1-kello." },
+  { id: 53, lecture: 7, question: "Miten asynkroninen laskuri kytketään?", answer: "T-kiikut ketjutetaan niin, että edellisen kiikun Q ohjaa seuraavan kiikun kellotuloa. Yhteistä kelloa ei ole." },
+
+  { id: 54, lecture: 4, question: "Muunna 1011₂ desimaaliksi.", answer: "Paikat: 8, 4, 2, 1\nNumerot: 1, 0, 1, 1\n1·8 = 8\n0·4 = 0\n1·2 = 2\n1·1 = 1\nYhteensä: 8 + 0 + 2 + 1 = 11" },
+  { id: 55, lecture: 4, question: "Muunna 1F₁₆ desimaaliksi.", answer: "Paikat: 16¹, 16⁰\nNumerot: 1, F (F = 15)\n1·16 = 16\nF·1 = 15 · 1 = 15\nYhteensä: 16 + 15 = 31" },
+  { id: 56, lecture: 4, question: "Mitä arvoa kirjaimet A–F tarkoittavat heksadesimaalissa?", answer: "A=10, B=11, C=12, D=13, E=14, F=15" },
+  { id: 57, lecture: 4, question: "Muunna desimaaliluku 13 binääriksi.", answer: "13 / 2 = 6, jää 1\n6 / 2 = 3, jää 0\n3 / 2 = 1, jää 1\n1 / 2 = 0, jää 1\nLuetaan alhaalta ylös: 1101₂" },
+  { id: 58, lecture: 4, question: "Mitkä ovat binääriluvun paikkojen arvot?", answer: "Oikealta alkaen: 2⁰ = 1, 2¹ = 2, 2² = 4, 2³ = 8 jne." }
 ];
 </script>
 <script>
